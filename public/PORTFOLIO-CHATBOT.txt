@@ -1,0 +1,77 @@
+DIXIT'S PORTFOLIO CHATBOT — HOW IT WORKS
+=========================================
+
+This project contains one portfolio website and one chatbot that answers
+questions about Dixit's profile and general questions. The Node.js server
+keeps AI provider keys out of the browser.
+
+STARTING THE PROJECT
+--------------------
+1. In the project folder, open a terminal and run: npm run dev
+2. Open a second terminal in the same folder and run: node server.js
+3. Open the local website address printed by Vite (usually localhost:5173).
+4. Keep both terminals running while using the chatbot.
+
+The chatbot works in profile-demo mode without an API key. Live AI answers
+require an API key with provider access, available quota, and billing as
+required by that provider.
+
+SETTING UP GEMINI
+-----------------
+1. Create a new Gemini API key in Google AI Studio. Revoke any key that has
+   previously been shared in chat, a screenshot, or a public repository.
+2. Create a .env file in the project root, next to server.js.
+3. Add:
+
+   GEMINI_API_KEY=your_new_key_here
+   GEMINI_MODEL=gemini-3.8-flash
+
+4. Save the file and restart the API server with: node server.js
+5. Visit http://localhost:3001/api/health and check that keyConfigured is true.
+   The health endpoint does not return the key itself.
+
+The Node server sends requests to Google's Interactions API. If the selected
+model is unavailable to your account, change GEMINI_MODEL to one your account
+supports. Never put a provider key into React code, a VITE_ variable, or this
+text file.
+
+HOW A CHAT MESSAGE FLOWS
+------------------------
+1. The portfolio chat sends a question to the local /api/chat endpoint.
+2. Vite forwards that request to the Node API server on port 3001.
+3. The server adds profile context from profile.js and calls the configured
+   AI provider. The provider key is sent only in a server-side request.
+4. The server returns the assistant's reply to the portfolio page.
+
+When no provider key is configured, the server reports demo mode and the
+website supplies a profile-based answer locally. Demo mode is useful for
+trying the interface, but it does not provide general AI-generated answers.
+If Gemini reaches its rate limit and an OpenAI key is configured, the server
+tries OpenAI automatically. If all configured providers are out of quota, the
+chatbot displays that issue rather than presenting a profile answer as a
+response to an unrelated question. General AI answers require an available
+provider quota.
+With a provider key configured, the AI can answer general questions too.
+Personal facts about Dixit remain limited to the verified profile.
+
+CHANGING DIXIT'S DETAILS
+------------------------
+Edit profile.js. The portfolio and chatbot both use this file, so keep the
+information accurate. Never store API keys or other secrets in profile.js.
+
+PROVIDER OPTIONS
+----------------
+Gemini is used when GEMINI_API_KEY is set. OpenAI is an optional alternative:
+set OPENAI_API_KEY (and optionally OPENAI_MODEL) in the root .env file.
+Gemini takes priority if both keys are present.
+
+TROUBLESHOOTING
+---------------
+- The portfolio loads but chat does not respond: make sure node server.js is
+  running in the second terminal.
+- keyConfigured is false: check the spelling and location of .env, then
+  restart the API server.
+- An API error appears: check the selected model, key permissions, provider
+  quota, and billing settings. Do not share the key in screenshots or chat.
+- The API status page reports server health and configuration only; it does
+  not make a provider request or reveal a secret.
