@@ -24,21 +24,33 @@ SETTING UP GEMINI
 3. Add:
 
    GEMINI_API_KEY=your_new_key_here
-   GEMINI_MODEL=gemini-3.8-flash
+   GEMINI_MODEL=gemini-2.5-flash
 
 4. Save the file and restart the API server with: node server.js
 5. Visit http://localhost:3001/api/health and check that keyConfigured is true.
    The health endpoint does not return the key itself.
 
-The Node server sends requests to Google's Interactions API. If the selected
+The Node server sends requests to Google's generateContent API. If the selected
 model is unavailable to your account, change GEMINI_MODEL to one your account
 supports. Never put a provider key into React code, a VITE_ variable, or this
 text file.
 
+DEPLOYING TO VERCEL
+-------------------
+The project has Vercel serverless functions in api/. Import the Git repository
+with its root as the Vercel project root. Add GEMINI_API_KEY as a server-side
+environment variable in Vercel, and optionally add GEMINI_MODEL. Apply the
+variables to the environments you use and redeploy. Keep the Vite build command
+as npm run build and output directory as dist; no custom Vercel configuration
+is required. Vercel runs api/chat.js and api/health.js at /api/chat and
+/api/health. The standalone server.js is only used for local development.
+Never use a VITE_ prefix for the Gemini key.
+
 HOW A CHAT MESSAGE FLOWS
 ------------------------
 1. The portfolio chat sends a question to the local /api/chat endpoint.
-2. Vite forwards that request to the Node API server on port 3001.
+2. In development, Vite forwards that request to the Node API server on port
+   3001. On Vercel, the api/chat.js serverless function handles the request.
 3. The server adds profile context from profile.js and calls the configured
    AI provider. The provider key is sent only in a server-side request.
 4. The server returns the assistant's reply to the portfolio page.
@@ -67,8 +79,10 @@ Gemini takes priority if both keys are present.
 
 TROUBLESHOOTING
 ---------------
-- The portfolio loads but chat does not respond: make sure node server.js is
-  running in the second terminal.
+- The portfolio loads but chat does not respond locally: make sure node
+  server.js is running in the second terminal.
+- On Vercel, visit /api/health and check keyConfigured. If it is false, add
+  GEMINI_API_KEY to the Vercel environment and redeploy.
 - keyConfigured is false: check the spelling and location of .env, then
   restart the API server.
 - An API error appears: check the selected model, key permissions, provider

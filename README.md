@@ -2,7 +2,7 @@
 
 A React portfolio website with a chatbot that answers questions about Dixit’s profile, education, skills, and projects.
 
-## Run the project
+## Run locally
 
 You need Node.js 20 or newer. Open the project folder in VS Code and use two terminals.
 
@@ -12,7 +12,7 @@ You need Node.js 20 or newer. Open the project folder in VS Code and use two ter
 npm run dev
 ```
 
-Open the local address Vite prints, usually `http://localhost:5173`.
+Open the local address Vite prints, usually `http://localhost:5173`. Vite forwards `/api` requests to the local API server.
 
 **Terminal 2 — chatbot API**
 
@@ -20,7 +20,7 @@ Open the local address Vite prints, usually `http://localhost:5173`.
 node server.js
 ```
 
-Keep both terminals running. Without an AI key, the chatbot uses profile-based demo answers. With a configured key, it uses live AI.
+Keep both terminals running. Without an AI key, the chatbot uses profile-based demo answers. With a configured key, it uses live AI. The API also supports `GET http://localhost:3001/api/health`.
 
 ## Connect Gemini
 
@@ -40,6 +40,19 @@ The key is read by the Node server and must never be placed in React/browser cod
 
 OpenAI is also supported through `OPENAI_API_KEY` and optional `OPENAI_MODEL` entries in `.env`. Gemini is selected first if both keys are present.
 
+## Deploy to Vercel
+
+The project includes Vercel serverless functions in `api/`, so Vercel serves the Vite website and `/api/chat` and `/api/health` from the same deployment. The standalone `server.js` remains for local development; Vercel does not run it as a persistent server.
+
+1. Import the project’s Git repository into Vercel and leave the project root set to the repository root.
+2. In **Project Settings → Environment Variables**, add:
+   - `GEMINI_API_KEY` — your Gemini API key
+   - `GEMINI_MODEL` — optional; defaults to `gemini-2.5-flash`
+3. Add the variables to the **Production** environment (and Preview/Development if needed), then redeploy.
+4. Keep Vercel’s Vite defaults: build command `npm run build`, output directory `dist`, install command `npm install`. No custom Vercel build configuration is required.
+
+The frontend calls the relative URL `/api/chat`, which resolves to the same Vercel deployment in production and is forwarded by Vite to `localhost:3001` locally. Never add the Gemini key as a `VITE_` variable or commit it to the repository. Check `https://<your-domain>/api/health`; it reports whether a provider key was detected but never exposes the key. If no valid key is configured, chat uses the existing profile-demo mode.
+
 ## Update portfolio details
 
 Edit `profile.js`. The website and AI profile context use the facts in this file. Do not put keys or secrets there.
@@ -48,7 +61,8 @@ Edit `profile.js`. The website and AI profile context use the facts in this file
 
 - `src/App.jsx` and `src/App.css` — portfolio and chatbot interface
 - `profile.js` — shared portfolio data
-- `server.js` — private provider key loading and AI requests
+- `server.js` — local API server and private provider key loading
+- `api/` and `lib/chat.js` — Vercel API functions and shared chat logic
 - `public/PORTFOLIO-CHATBOT.txt` — plain-text setup and integration guide
 
 ## Build and lint

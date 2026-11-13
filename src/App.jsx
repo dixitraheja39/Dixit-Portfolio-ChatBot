@@ -73,10 +73,10 @@ function PortfolioChat() {
       try {
         result = body ? JSON.parse(body) : null
       } catch {
-        throw new Error(`Chat API returned an invalid response (HTTP ${response.status}). Make sure the API server is running with node server.js.`)
+        throw new Error(`Chat API returned an invalid response (HTTP ${response.status}). Check that the deployment includes the /api/chat endpoint.`)
       }
       if (!result || typeof result !== 'object') {
-        throw new Error(`Chat API returned an empty response (HTTP ${response.status}). Make sure the API server is running with node server.js.`)
+        throw new Error(`Chat API returned an empty response (HTTP ${response.status}). Check that the deployment includes the /api/chat endpoint.`)
       }
       if (!response.ok) throw new Error(result.error || 'Could not get a reply.')
       const reply = result.mode === 'demo' ? localProfileAnswer(text) : result.reply
